@@ -1,18 +1,23 @@
 module.exports = MiddleWare;
 
 function MiddleWare(){
-  this.funcs = [];
-  this.index = 0;
-  var _this = this;
+  var funcs = [];
+  var index = 0;
+  var ctx = {};
+  var last;
+  _this = this
+  
   this.use = function(func){
-    _this.funcs.push(function() {
-      _this.index = _this.index + 1;
-      _this.funcs[_this.index] ? func(_this.funcs[_this.index]): func(function(){console.log('fuck');});
-    });
+    funcs.push(func);
   };
+  
   this.go = function(func){
-    console.log(this.funcs.length);
-    this.funcs[0]();
-    func(); 
+    last = func;
+    funcs[0].call(ctx, this.next);
   };
+  
+  this.next = function(){
+    index = index + 1;
+    funcs[index] ? funcs[index].call(ctx, _this.next) : last.call(ctx);
+  }
 }
